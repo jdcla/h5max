@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="h5max",
-    version="0.1.0",
+    version="0.1.1",
     author="Jim Clauwaert",
     author_email="jim.clauwaert@ugent.be",
     packages=["h5max"],
