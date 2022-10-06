@@ -5,6 +5,11 @@ A utility package built upon `h5py` for easier data saving and loading.
 This package features:
 - facilitated saving and loading of sparse matrices using `scipy`.
 
+## Installation
+
+```
+pip install h5max
+```
 
 ## Usage
 
