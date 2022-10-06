@@ -35,6 +35,8 @@ a_out = h5max.load_sparse_matrices(fh, 0, format='csr')
 
 # load [a,b]
 Ms_out = h5max.load_sparse_matrices(fh, [0, 1], format='csr')
+
+fh.close()
 ```
 
 
