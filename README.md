@@ -38,4 +38,4 @@ Ms_out = h5max.load_sparse_matrices(fh, [0, 1], format='csr')
 ```
 
 
-![h5max_pic](h5max.png)
+![h5max_pic](https://github.com/jdcla/h5max/h5max.png)
