@@ -23,7 +23,7 @@ def store_sparse_matrices(fh, Ms, format='csr'):
 
     Parameters
     ----------
-    Ms: list(np.array)
+    Ms: np.array OR list(np.array)
         list of np.array matrices
     fh: str
         handle to destination HDF5 group
@@ -99,12 +99,12 @@ def load_sparse_matrix(fh, idx, format):
         
     Returns
     ----------
-    M_s : np.array
+    M : np.array
     """
     attributes = []
     for attribute in format_attr_dict[format]:
         attributes.append(fh[attribute][idx])
     # construct sparse matrix
-    M_s = format_dict[format](tuple(attributes[:3]), shape=attributes[3]).toarray()
+    M = format_dict[format](tuple(attributes[:3]), shape=attributes[3]).toarray()
     
-    return M_s
+    return M
