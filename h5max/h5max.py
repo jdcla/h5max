@@ -15,7 +15,7 @@ format_attr_dict = {'csc': ['data', 'indices', 'indptr', 'shape'],
                     'csr': ['data', 'indices', 'indptr', 'shape'],
                     }
 
-def store_sparse_matrices(fh, Ms, format='csr'):
+def store_sparse_matrices(fh, Ms, format='csr', overwrite=True):
     """
     Store a list of matrices in HDF5 (based on h5py syntax). Attributes of a single
     matrix are stored at the same index for the different attribute datasets. Matrices are
@@ -30,6 +30,8 @@ def store_sparse_matrices(fh, Ms, format='csr'):
     format:
         sparse storing strategy utilized by scipy.
         supported types are [csc, csr]
+    overwrite: bool
+        whether to overwrite existing nodes by default or raise an error
     """
     if type(Ms) == np.array:
         Ms = [Ms]
@@ -42,7 +44,7 @@ def store_sparse_matrices(fh, Ms, format='csr'):
     
     for attribute in data.keys():
         # remove existing nodes
-        if attribute in fh.keys():  
+        if overwrite and attribute in fh.keys():  
             del fh[attribute]
         att_dtype = data[attribute][0].dtype
         att_lens = np.array([len(d) for d in data[attribute]])
