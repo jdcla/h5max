@@ -18,12 +18,13 @@ format_attr_dict = {'csc': ['data', 'indices', 'indptr', 'shape'],
 def store_sparse_matrices(fh, Ms, format='csr'):
     """
     Store a list of matrices in HDF5 (based on h5py syntax). Attributes of a single
-    matrix are stored at the same index for the different attribute datasets
+    matrix are stored at the same index for the different attribute datasets. Matrices are
+    expected to be sparse.
 
     Parameters
     ----------
-    Ms: List(scipy.sparse)
-        list of sparse matrices
+    Ms: list(np.array)
+        list of np.array matrices
     fh: str
         handle to destination HDF5 group
     format:
@@ -33,6 +34,7 @@ def store_sparse_matrices(fh, Ms, format='csr'):
     if type(Ms) == np.array:
         Ms = [Ms]
     data = {key: [] for key in format_attr_dict[format]}
+    
     for sample in Ms:
         sample_s = format_dict[format](sample)
         for attribute in data.keys():
@@ -73,8 +75,11 @@ def load_sparse_matrices(fh, idxs=None, format='csr'):
     if type(idxs) == int:
         return load_sparse_matrix(fh, idxs, format=format)
     data = []
+    if idxs is None:
+        idxs = np.arange(len(fh[format_attr_dict[format][0]]))
     for idx in idxs:
         data.append(load_sparse_matrix(fh, idx, format=format))
+        
     return data
 
 def load_sparse_matrix(fh, idx, format):
@@ -85,7 +90,7 @@ def load_sparse_matrix(fh, idx, format):
     ----------
     fh: str
         handle to source HDF5 group
-    idxs: [int, list(int), None]
+    idx: [int, list(int), None]
         single index or list of indices. If no indexes are given,
         all matrices are loaded.
     format:
@@ -101,4 +106,5 @@ def load_sparse_matrix(fh, idx, format):
         attributes.append(fh[attribute][idx])
     # construct sparse matrix
     M_s = format_dict[format](tuple(attributes[:3]), shape=attributes[3]).toarray()
+    
     return M_s
