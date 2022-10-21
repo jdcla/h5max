@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 from scipy import sparse
-from typing import Optional, Literal, Union, List, TypeVar
+from typing import Literal, Union, List, TypeVar
 
 format_dict = {
     'csr': sparse.csr_matrix,
