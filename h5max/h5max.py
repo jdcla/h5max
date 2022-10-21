@@ -1,119 +1,128 @@
 import numpy as np
 import h5py
 from scipy import sparse
+from typing import Optional, Literal, Union, List, TypeVar
 
-format_dict = {'csc': sparse.csc_matrix,
-               'csr': sparse.csr_matrix,
-#               'coo': sparse.coo_matrix,
-#               'bsc': sparse.bsr_matrix,
-#               'dia': sparse.dia_matrix,
-#               'dok': sparse.dok_matrix,
-#               'lil': sparse.lil_matrix,
-               }
+format_dict = {
+    'csr': sparse.csr_matrix,
+    'csc': sparse.csc_matrix,
+    'coo': sparse.coo_matrix,
+#   'bsr': sparse.bsr_matrix,   <- could be implemented, need extra attribute to describe data shape
+#   'dia': sparse.dia_matrix,   <- could be implemented, need extra attribute to describe data shape
+#   'dok': sparse.dok_matrix,   <- seems not feasible
+#   'lil': sparse.lil_matrix,   <- seems not feasible
+}
 
-format_attr_dict = {'csc': ['data', 'indices', 'indptr', 'shape'],
-                    'csr': ['data', 'indices', 'indptr', 'shape'],
-                    }
+S = TypeVar("S", *list(format_dict.keys()))
 
-def store_sparse_matrices(fh, Ms, format='csr', overwrite=False):
-    """
-    Store a list of matrices in HDF5 (based on h5py syntax). Attributes of a single
+format_attr_dict = {
+    'csr': ['data', 'indices', 'indptr', 'shape'],
+    'csc': ['data', 'indices', 'indptr', 'shape'],
+    'coo': ['data', 'row', 'col', 'shape'],
+    'bsr': ['data', 'indices', 'indptr', 'shape'],
+    'dia': ['data', 'offsets', 'shape'],
+}
+
+def store_sparse_matrices(
+    f: Union[h5py._hl.group.Group, h5py._hl.files.File],
+    data: Union[np.ndarray, List[np.ndarray], S, List[S]], 
+    format: Literal["csc", "csr", "coo"] = "csr", 
+    overwrite: bool = False,
+    ):
+    """Store a list of matrices in HDF5 (based on h5py syntax). Attributes of a single
     matrix are stored at the same index for the different attribute datasets. Matrices are
-    expected to be sparse.
+    expected to be already sparse or numpy arrays.
 
-    Parameters
-    ----------
-    Ms: np.array OR list(np.array)
-        list of np.array matrices
-    fh: str
-        handle to destination HDF5 group
-    format:
-        sparse storing strategy utilized by scipy.
-        supported types are [csc, csr]
-    overwrite: bool
-        whether to overwrite existing nodes by default or raise an error
+    Args:
+        f (Union[h5py._hl.group.Group, h5py._hl.files.File]): handle to destination HDF5 group
+        data (Union[np.ndarray, List[np.ndarray], S, List[S]]): matrix or list of matrices
+        format (Literal[&quot;csc&quot;, &quot;csr&quot;], optional): sparse storing strategy 
+            utilized by scipy. Ignored when a sparse matrix or a list of sparse matrices is given for
+            data. Defaults to "csr".
+        overwrite (bool, optional): whether to overwrite existing nodes by default or raise an error.
+            Defaults to False.
     """
-    if type(Ms) == np.array:
-        Ms = [Ms]
-    data = {key: [] for key in format_attr_dict[format]}
+    if type(data) != list:
+        data = [data]
+    transform = type(data[0]) == np.ndarray
+    data_attr = {key: [] for key in format_attr_dict[format]}
     
-    for sample in Ms:
-        sample_s = format_dict[format](sample)
-        for attribute in data.keys():
-            data[attribute].append(np.array(getattr(sample_s, attribute)))
+    for sample in data:
+        if transform:
+            sample = format_dict[format](sample)
+        for attribute in data_attr.keys():
+            data_attr[attribute].append(np.array(getattr(sample, attribute)))
     
-    for attribute in data.keys():
+    for attribute in data_attr.keys():
         # remove existing nodes
-        if overwrite and attribute in fh.keys():  
-            del fh[attribute]
-        att_dtype = data[attribute][0].dtype
-        att_lens = np.array([len(d) for d in data[attribute]])
+        if overwrite and attribute in f.keys():  
+            del f[attribute]
+        att_dtype = data_attr[attribute][0].dtype
+        att_lens = np.array([len(d) for d in data_attr[attribute]])
         try:
             if (att_lens[0] == att_lens).all():
-                fh.create_dataset(attribute, data=data[attribute])
+                f.create_dataset(attribute, data=data_attr[attribute])
             else:
-                fh.create_dataset(attribute, data=data[attribute], dtype=h5py.vlen_dtype(att_dtype))
+                f.create_dataset(attribute, data=data_attr[attribute], dtype=h5py.vlen_dtype(att_dtype))
         except ValueError as e:
             p = e.args[0].split('dataset')
             e.args = (p[0] + "dataset \"%s\"" % attribute + p[-1] +
             ". Did you mean to specify `overwrite=True`?", )
-            raise 
-                
+            raise        
             
-            
-            
-def load_sparse_matrices(fh, idxs=None, format='csr'):
-    """
-    load a list of sparse matrices from a HDF5 group
+def load_sparse_matrices(
+    f: Union[h5py._hl.group.Group, h5py._hl.files.File],
+    idxs: Union[int, List[int], None],
+    format: Literal["csr", "csc", "coo"] = "csr",
+    to_numpy: bool = True
+    ) -> Union[np.ndarray, List[np.ndarray]]:
+    """load a list of sparse matrices from a HDF5 group
 
-    Parameters
-    ----------
-    fh: str
-        handle to source HDF5 group
-    idxs: [int, list(int), None]
-        single index or list of indices. If no indexes are given,
+    Args:
+        f (Union[h5py._hl.group.Group, h5py._hl.files.File]): handle to source HDF5 group
+        idxs (Union[int, List[int], None]):single index or list of indices. If no indexes are given, 
         all matrices are loaded.
-    format:
-        sparse storing strategy utilized by scipy.
-        supported types are [csc, csr]
-        
-    Returns
-    ----------
-    Ms : np.array OR list(np.array)
+        format (Literal[&quot;csr&quot;, &quot;csc&quot;, &quot;coo&quot;], optional): sparse storing 
+        strategy utilized by scipy. Defaults to "csr".
+        to_numpy (bool), optional: return dense numpy array. Defaults to True.
+
+    Returns:
+        Union[np.ndarray, List[np.ndarray]: matrix or list of matrices
     """
     if type(idxs) == int:
-        return load_sparse_matrix(fh, idxs, format=format)
+        return load_sparse_matrix(f, idxs, format=format, to_numpy=to_numpy)
     data = []
     if idxs is None:
-        idxs = np.arange(len(fh[format_attr_dict[format][0]]))
+        idxs = np.arange(len(f[format_attr_dict[format][0]]))
     for idx in idxs:
-        data.append(load_sparse_matrix(fh, idx, format=format))
+        data.append(load_sparse_matrix(f, idx, format=format, to_numpy=to_numpy))
         
     return data
 
-def load_sparse_matrix(fh, idx, format):
-    """
-    load a single sparse matrix from a HDF5 group
+def load_sparse_matrix(
+    f: Union[h5py._hl.group.Group, h5py._hl.files.File],
+    idx: int,
+    format: Literal["csr", "csc", "coo"] = "csr",
+    to_numpy: bool = True
+    ) -> np.ndarray:
+    """load a single sparse matrix from a HDF5 group
 
-    Parameters
-    ----------
-    fh: str
-        handle to source HDF5 group
-    idx: [int, list(int), None]
-        single index or list of indices. If no indexes are given,
-        all matrices are loaded.
-    format:
-        sparse storing strategy utilized by scipy.
-        supported types are [csc, csr]
-        
-    Returns
-    ----------
-    M : np.array
+    Args:
+        f (Union[h5py._hl.group.Group, h5py._hl.files.File]): handle to source HDF5 group
+        idx (int): single index 
+        format (Literal[&quot;csr&quot;, &quot;csc&quot;, &quot;coo&quot;], optional): 
+        sparse storing strategy utilized by scipy. Defaults to "csr".
+        to_numpy (bool), optional: return dense numpy array. Defaults to True.
+
+    Returns:
+        np.ndarray
     """
     attributes = []
     for attribute in format_attr_dict[format]:
-        attributes.append(fh[attribute][idx])
+        attributes.append(f[attribute][idx])
     # construct sparse matrix
-    M = format_dict[format](tuple(attributes[:3]), shape=attributes[3]).toarray()
+    array = format_dict[format](tuple(attributes[:-1]), shape=attributes[-1])
+    if to_numpy:
+        array = array.toarray()
     
-    return M
+    return array
