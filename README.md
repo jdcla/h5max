@@ -1,5 +1,10 @@
 # h5max
 
+[![PyPi Version](https://img.shields.io/pypi/v/h5max.svg)](https://pypi.python.org/pypi/h5max/)
+[![GitHub license](https://img.shields.io/github/license/jdcla/h5max)](https://github.com/jdcla/h5max/blob/main/LICENSE.md)
+[![GitHub issues](https://img.shields.io/github/issues/jdcla/h5max)](https://github.com/jdcla/h5max/issues)
+[![GitHub stars](https://img.shields.io/github/stars/jdcla/h5max)](https://github.com/jdcla/h5max/stargazers)
+
 A utility package built upon `h5py` for easier data saving and loading.
 
 This package features:
