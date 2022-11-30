@@ -34,13 +34,13 @@ b[1,0] = 10
 Ms = [a, b]
 
 # store both a, b
-h5max.store_sparse_matrices(fh, Ms, format='csr')
+h5max.store_sparse(fh, Ms, format='csr')
 
 # load only a (index 0)
-a_out = h5max.load_sparse_matrices(fh, 0, format='csr')
+a_out = h5max.load_sparse(fh, 0, format='csr')
 
 # load [a,b]
-Ms_out = h5max.load_sparse_matrices(fh, [0, 1], format='csr')
+Ms_out = h5max.load_sparse(fh, [0, 1], format='csr')
 
 fh.close()
 ```
@@ -52,6 +52,6 @@ fh.close()
 # Package features
 
 - [x] Support for `csr`, `csc`, `coo` sparse types
-- [] Support for `bsr`, `dia`, `dok`, `lil` sparse types
+- [ ] Support for `bsr`, `dia`, `dok`, `lil` sparse types
 - [x] Support for overwriting
 - [x] Flexible data loading and saving (both as sparse and numpy arrays.)
