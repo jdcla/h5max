@@ -1,24 +1,25 @@
-# h5max
+<div align="center">
+<h1>h5max</h1>
+
+A utility package built upon `h5py` for easier data saving and loading of sparse data objects.
 
 [![PyPi Version](https://img.shields.io/pypi/v/h5max.svg)](https://pypi.python.org/pypi/h5max/)
 [![GitHub license](https://img.shields.io/github/license/jdcla/h5max)](https://github.com/jdcla/h5max/blob/main/LICENSE.md)
 [![GitHub issues](https://img.shields.io/github/issues/jdcla/h5max)](https://github.com/jdcla/h5max/issues)
 [![GitHub stars](https://img.shields.io/github/stars/jdcla/h5max)](https://github.com/jdcla/h5max/stargazers)
+</div>
 
-A utility package built upon `h5py` for easier data saving and loading.
-
-This package features:
-- facilitated saving and loading of sparse matrices using `scipy`.
+`h5max` handles storing and loading of `scipy.sparse` data structures in `h5py` file objects that are not natively supported. It assumes a simple data structure where information of individual samples are stored according to the index they occupy within datasets.  
 
 ## Installation
 
-```
+```bash
 pip install h5max
 ```
 
 ## Usage
 
-```
+```python
 import h5py
 import h5max
 import numpy as np
@@ -45,4 +46,12 @@ fh.close()
 ```
 
 
-![h5max_pic](https://github.com/jdcla/h5max/blob/main/h5max.png)
+<img src="https://github.com/jdcla/h5max/raw/main/h5max.png" width="600">
+
+
+# Package features
+
+- [x] Support for `csr`, `csc`, `coo` sparse types
+- [] Support for `bsr`, `dia`, `dok`, `lil` sparse types
+- [x] Support for overwriting
+- [x] Flexible data loading and saving (both as sparse and numpy arrays.)

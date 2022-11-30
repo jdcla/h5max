@@ -2,6 +2,7 @@ import numpy as np
 import h5py
 from scipy import sparse
 from typing import Literal, Union, List, TypeVar
+from pdb import set_trace
 
 format_dict = {
     'csr': sparse.csr_matrix,
@@ -23,7 +24,7 @@ format_attr_dict = {
     'dia': ['data', 'offsets', 'shape'],
 }
 
-def store_sparse_matrices(
+def store_sparse(
     f: Union[h5py._hl.group.Group, h5py._hl.files.File],
     data: Union[np.ndarray, List[np.ndarray], S, List[S]], 
     format: Literal["csc", "csr", "coo"] = "csr", 
@@ -70,7 +71,7 @@ def store_sparse_matrices(
             ". Did you mean to specify `overwrite=True`?", )
             raise        
             
-def load_sparse_matrices(
+def load_sparse(
     f: Union[h5py._hl.group.Group, h5py._hl.files.File],
     idxs: Union[int, List[int], None],
     format: Literal["csr", "csc", "coo"] = "csr",
@@ -89,7 +90,7 @@ def load_sparse_matrices(
     Returns:
         Union[np.ndarray, List[np.ndarray]: matrix or list of matrices
     """
-    if type(idxs) == int:
+    if isinstance(idxs, (int, np.integer)):
         return load_sparse_matrix(f, idxs, format=format, to_numpy=to_numpy)
     data = []
     if idxs is None:
