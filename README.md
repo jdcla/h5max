@@ -11,6 +11,10 @@ A utility package built upon `h5py` for easier data saving and loading of sparse
 
 `h5max` handles storing and loading of `scipy.sparse` data structures in `h5py` file objects that are not natively supported. It assumes a simple data structure where information of individual samples are stored according to the index they occupy within datasets.  
 
+<div align="center">
+<img src="https://github.com/jdcla/h5max/raw/main/h5max.png" width="600">
+</div>
+
 ## Installation
 
 ```bash
@@ -44,10 +48,6 @@ Ms_out = h5max.load_sparse(fh, [0, 1], format='csr')
 
 fh.close()
 ```
-
-
-<img src="https://github.com/jdcla/h5max/raw/main/h5max.png" width="600">
-
 
 # Package features
 
