@@ -52,7 +52,7 @@ m_list_out = h5max.load_sparse(fh, format='csr')
 fh.close()
 ```
 
-# ✔️ Package features
+## ✔️ Package features
 
 - [x] Support for `csr`, `csc`, `coo` sparse types
 - [ ] Support for `bsr`, `dia`, `dok`, `lil` sparse types
