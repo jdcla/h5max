@@ -15,13 +15,13 @@ A utility package built upon `h5py` for easier data saving and loading of sparse
 <img src="https://github.com/jdcla/h5max/raw/main/h5max.png" width="600">
 </div>
 
-## Installation
+## 🔗 Installation
 
 ```bash
 pip install h5max
 ```
 
-## Usage
+## 📖 User guide
 
 ```python
 import h5py
@@ -35,23 +35,27 @@ b = np.zeros((1000,50))
 a[7,1] = 1
 b[1,0] = 10
 
-Ms = [a, b]
+m_list = [a, b]
 
 # store both a, b
-h5max.store_sparse(fh, Ms, format='csr')
+h5max.store_sparse(fh, m_list, format='csr')
 
 # load only a (index 0)
 a_out = h5max.load_sparse(fh, 0, format='csr')
 
 # load [a,b]
-Ms_out = h5max.load_sparse(fh, [0, 1], format='csr')
+m_list_out = h5max.load_sparse(fh, [0, 1], format='csr', to_numpy=True)
+
+# load all idxs in the data
+m_list_out = h5max.load_sparse(fh, format='csr')
 
 fh.close()
 ```
 
-# Package features
+# ✔️ Package features
 
 - [x] Support for `csr`, `csc`, `coo` sparse types
 - [ ] Support for `bsr`, `dia`, `dok`, `lil` sparse types
 - [x] Support for overwriting
 - [x] Flexible data loading and saving (both as sparse and numpy arrays.)
+- [ ] Automatic format detection
